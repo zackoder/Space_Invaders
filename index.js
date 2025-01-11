@@ -1,4 +1,5 @@
-const game = document.querySelector("#game");
+/* const game = document.querySelector("#game");
+const player = document.querySelector(".player");
 
 let win = false;
 let top = 0;
@@ -9,7 +10,9 @@ let score = 0;
 let bestScore = localStorage.getItem("bestScore") || 0;
 let isPaused = true;
 let isGameOver = false;
+let enemesPositions = [];
 
+let playerPosition = 255;
 let keysPressed = {};
 
 const scoreDisplay = document.querySelector("#score");
@@ -21,24 +24,24 @@ currentScoreDisplay.innerHTML = `Score: ${score}`;
 const layout = document.querySelector(".lay_out");
 let firingCooldown = false;
 
-// Track animation frame IDs
 let enemiesAnimationId = null;
 let bulletsAnimationId = null;
 let playerAnimationId = null;
 
-// Draw the enemies
 function drawEnemies() {
   top = 0;
   left = 0;
   enemies = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 7; j++) {
       const alien = new Image();
       const enemyType = Math.ceil(Math.random() * 3);
       alien.src = `./images/enemy${enemyType}.png`;
       alien.className = "alien";
       alien.style.position = "absolute";
-      
+      alien.style.transform = `translate(${left}px, ${top}px)`;
+      let enemyPosition = { Left: left, Top: top };
+      enemesPositions.push(enemyPosition);
       left += 44;
       game.appendChild(alien);
       enemies.push(alien);
@@ -48,95 +51,119 @@ function drawEnemies() {
   }
 }
 
-// Initialize player
-const player = new Image();
-player.src = "images/player.png";
-player.style.position = "absolute";
-player.style.bottom = "10px";
-player.style.left = "154px";
-player.style.zIndex = "10";
-player.className = "player";
-game.appendChild(player);
-
-// Game variables
 let enemyDirection = 1;
-const enemySpeed = 3;
-const bulletSpeed = 20;
-const playerSpeed = 5;
+const enemySpeed = 1;
+const bulletSpeed = 10;
+const playerSpeed = 3;
 
 drawEnemies();
 
 function updateEnemies() {
   if (isGameOver || isPaused) return;
 
-  enemies.forEach((enemy) => {
-    let currentLeft = parseInt(enemy.style.left, 10);
+  enemies.forEach((enemy, i) => {
+    let currentLeft = enemesPositions[i].Left;
+    let currentTop = enemesPositions[i].Top;
+
     let newLeft = currentLeft + enemySpeed * enemyDirection;
 
-    if (newLeft <= 0 || newLeft >= game.clientWidth - 46) {
+    if (newLeft <= 0 || newLeft >= 550) {
       enemyDirection *= -1;
-      enemies.forEach((e) => {
-        let currentTop = parseInt(e.style.top, 10);
-        e.style.top = `${currentTop + 5}px`;
+      enemies.forEach((e, index) => {
+        let eTop = enemesPositions[index].Top;
+        e.style.transform = `translate(${enemesPositions[index].Left}px, ${
+          eTop + 5
+        }px)`;
+        enemesPositions[index].Top += 5;
       });
     }
 
-    enemy.style.left = `${currentLeft + enemySpeed * enemyDirection}px`;
+    enemesPositions[i].Left = newLeft;
+    enemy.style.transform = `translate(${newLeft}px, ${currentTop}px)`;
 
-    if (parseInt(enemy.style.top, 10) >=  550) {
+    if (currentTop >= 550) {
       if (!isGameOver) {
         endGame("Game Over");
       }
     }
   });
 
+  // Continue animation
   enemiesAnimationId = requestAnimationFrame(updateEnemies);
 }
+
 
 function updateBullets() {
   if (isGameOver || isPaused) return;
 
-  bullets = bullets.filter((bullet) => {
-    let bulletTop = parseInt(bullet.style.top, 10);
-    bullet.style.top = `${bulletTop - bulletSpeed}px`;
+  // Iterate backward to prevent index shifting issues during removal
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    let bullet = bullets[i];
+    let bulletTop = bulletPosition[i].Top;
+    let bulletLeft = bulletPosition[i].Left;
 
+    // Move the bullet
+    bulletTop -= bulletSpeed;
+    bullet.style.transform = `translate(${bulletLeft}px, ${bulletTop}px)`;
+    bulletPosition[i].Top = bulletTop;
+
+    // Remove bullet if it moves out of bounds
     if (bulletTop <= 0) {
       bullet.remove();
-      return false;
+      bullets.splice(i, 1);
+      bulletPosition.splice(i, 1);
+      continue; // Skip further processing for this bullet
     }
 
-    enemies.forEach((enemy, index) => {
+    // Check for collision with enemies
+    let collided = false;
+    for (let j = enemies.length - 1; j >= 0; j--) {
+      let enemy = enemies[j];
       if (checkCollision(bullet, enemy)) {
+        // Remove the bullet and the enemy
         bullet.remove();
         enemy.remove();
-        enemies.splice(index, 1);
+        bullets.splice(i, 1);
+        bulletPosition.splice(i, 1);
+        enemies.splice(j, 1);
+
+        // Update the score
         score += 10;
         currentScoreDisplay.innerHTML = `Score: ${score}`;
+        collided = true;
+        break; // Stop checking this bullet for further collisions
       }
-    });
-
-    if (enemies.length === 0) {
-      endGame("You Win!");
     }
 
-    return true;
-  });
+    // If enemies are all defeated, end the game
+    if (enemies.length === 0) {
+      endGame("You Win!");
+      return; // Stop further updates if the game is won
+    }
 
+    // If the bullet collided, skip further processing for this bullet
+    if (collided) continue;
+  }
+
+  // Continue animation
   bulletsAnimationId = requestAnimationFrame(updateBullets);
 }
+
 
 function handlePlayerMovement() {
   if (isGameOver || isPaused) return;
 
-  const playerLeft = parseInt(player.style.left, 10);
-  if (keysPressed["ArrowLeft"] && playerLeft > 0) {
-    player.style.left = `${playerLeft - playerSpeed}px`;
+  if (keysPressed["ArrowLeft"] && playerPosition > 0) {
+    player.style.transform = `translate(${
+      playerPosition - playerSpeed
+    }px, 550px)`;
+    playerPosition -= playerSpeed;
   }
-  if (
-    keysPressed["ArrowRight"] &&
-    playerLeft < game.clientWidth - player.width
-  ) {
-    player.style.left = `${playerLeft + playerSpeed}px`;
+  if (keysPressed["ArrowRight"] && playerPosition < 550) {
+    player.style.transform = `translate(${
+      playerPosition + playerSpeed
+    }px, 550px)`;
+    playerPosition += playerSpeed;
   }
 
   playerAnimationId = requestAnimationFrame(handlePlayerMovement);
@@ -168,20 +195,19 @@ function endGame(message) {
   cancelAnimations();
 }
 
+let bulletPosition = [];
+
 function fireBullet() {
   if (!firingCooldown) {
-    const playerLeft = parseInt(player.style.left, 10);
+    const playerLeft = playerPosition + 23;
     const bullet = document.createElement("div");
-    bullet.style.position = "absolute";
-    bullet.style.width = "5px";
-    bullet.style.height = "10px";
-    bullet.style.background = "red";
-    bullet.style.left = `${playerLeft + player.width / 2 - 2.5}px`;
-    bullet.style.top = `550px`;
+    bullet.style.transform = `translate(${playerLeft}px, 550px)`;
+    let bulletP = { Left: playerLeft, Top: 550 };
+
     bullet.className = "bullet";
     game.appendChild(bullet);
+    bulletPosition.push(bulletP);
     bullets.push(bullet);
-
     firingCooldown = true;
     setTimeout(() => (firingCooldown = false), 200);
   }
@@ -192,9 +218,13 @@ function resetGame() {
   isGameOver = false;
   isPaused = false;
   score = 0;
+  playerPosition = 255;
+  enemesPositions = []
+  bulletPosition = []
   currentScoreDisplay.innerHTML = `Score: ${score}`;
   enemies.forEach((enemy) => enemy.remove());
   bullets.forEach((bullet) => bullet.remove());
+  bulletPosition = [];
   drawEnemies();
   layout.style.display = "none";
 
@@ -248,3 +278,4 @@ document.addEventListener("keyup", (e) => {
 enemiesAnimationId = requestAnimationFrame(updateEnemies);
 bulletsAnimationId = requestAnimationFrame(updateBullets);
 playerAnimationId = requestAnimationFrame(handlePlayerMovement);
+ */
