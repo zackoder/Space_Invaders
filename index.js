@@ -1,8 +1,8 @@
-/* const game = document.querySelector("#game");
+const game = document.getElementById("game");
 const player = document.querySelector(".player");
 
 let win = false;
-let top = 0;
+let topp = 0;
 let left = 0;
 let enemies = [];
 let bullets = [];
@@ -29,9 +29,6 @@ let bulletsAnimationId = null;
 let playerAnimationId = null;
 
 function drawEnemies() {
-  top = 0;
-  left = 0;
-  enemies = [];
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 7; j++) {
       const alien = new Image();
@@ -39,15 +36,15 @@ function drawEnemies() {
       alien.src = `./images/enemy${enemyType}.png`;
       alien.className = "alien";
       alien.style.position = "absolute";
-      alien.style.transform = `translate(${left}px, ${top}px)`;
-      let enemyPosition = { Left: left, Top: top };
+      alien.style.transform = `translate(${left}px, ${topp}px)`;
+      let enemyPosition = { Left: left, Top: topp };
       enemesPositions.push(enemyPosition);
       left += 44;
       game.appendChild(alien);
       enemies.push(alien);
     }
     left = 0;
-    top += 30;
+    topp += 30;
   }
 }
 
@@ -92,67 +89,57 @@ function updateEnemies() {
   enemiesAnimationId = requestAnimationFrame(updateEnemies);
 }
 
-
 function updateBullets() {
   if (isGameOver || isPaused) return;
 
-  // Iterate backward to prevent index shifting issues during removal
   for (let i = bullets.length - 1; i >= 0; i--) {
     let bullet = bullets[i];
     let bulletTop = bulletPosition[i].Top;
     let bulletLeft = bulletPosition[i].Left;
 
-    // Move the bullet
     bulletTop -= bulletSpeed;
     bullet.style.transform = `translate(${bulletLeft}px, ${bulletTop}px)`;
     bulletPosition[i].Top = bulletTop;
 
-    // Remove bullet if it moves out of bounds
     if (bulletTop <= 0) {
       bullet.remove();
       bullets.splice(i, 1);
       bulletPosition.splice(i, 1);
-      continue; // Skip further processing for this bullet
+      continue;
     }
 
-    // Check for collision with enemies
-    let collided = false;
+    // let collided = false;
     for (let j = enemies.length - 1; j >= 0; j--) {
       let enemy = enemies[j];
       if (checkCollision(bullet, enemy)) {
-        // Remove the bullet and the enemy
         bullet.remove();
         enemy.remove();
         bullets.splice(i, 1);
+        enemesPositions.splice(j, 1);
         bulletPosition.splice(i, 1);
+        console.log("befor: ", enemies);
         enemies.splice(j, 1);
-
-        // Update the score
+        console.log("after: ", enemies);
         score += 10;
         currentScoreDisplay.innerHTML = `Score: ${score}`;
-        collided = true;
-        break; // Stop checking this bullet for further collisions
+        // collided = true;
+        break;
       }
     }
 
-    // If enemies are all defeated, end the game
     if (enemies.length === 0) {
       endGame("You Win!");
-      return; // Stop further updates if the game is won
+      return;
     }
 
-    // If the bullet collided, skip further processing for this bullet
-    if (collided) continue;
+    // if (collided) continue;
   }
 
-  // Continue animation
   bulletsAnimationId = requestAnimationFrame(updateBullets);
 }
 
-
 function handlePlayerMovement() {
   if (isGameOver || isPaused) return;
-
   if (keysPressed["ArrowLeft"] && playerPosition > 0) {
     player.style.transform = `translate(${
       playerPosition - playerSpeed
@@ -165,7 +152,6 @@ function handlePlayerMovement() {
     }px, 550px)`;
     playerPosition += playerSpeed;
   }
-
   playerAnimationId = requestAnimationFrame(handlePlayerMovement);
 }
 
@@ -214,16 +200,19 @@ function fireBullet() {
 }
 
 function resetGame() {
+  topp = 0;
+  left = 0;
   win = false;
   isGameOver = false;
   isPaused = false;
   score = 0;
-  playerPosition = 255;
-  enemesPositions = []
-  bulletPosition = []
+  enemesPositions = [];
+  bulletPosition = [];
   currentScoreDisplay.innerHTML = `Score: ${score}`;
   enemies.forEach((enemy) => enemy.remove());
   bullets.forEach((bullet) => bullet.remove());
+  bullets = [];
+  enemies = [];
   bulletPosition = [];
   drawEnemies();
   layout.style.display = "none";
@@ -274,8 +263,6 @@ document.addEventListener("keyup", (e) => {
   keysPressed[e.key] = false;
 });
 
-// Start the initial animations
 enemiesAnimationId = requestAnimationFrame(updateEnemies);
 bulletsAnimationId = requestAnimationFrame(updateBullets);
 playerAnimationId = requestAnimationFrame(handlePlayerMovement);
- */

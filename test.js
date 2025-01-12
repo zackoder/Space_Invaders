@@ -1,4 +1,4 @@
-const game = document.querySelector("#game");
+/* const game = document.querySelector("#game");
 
 let win = false;
 let top = 0;
@@ -237,7 +237,7 @@ document.addEventListener("keyup", (e) => {
   keysPressed[e.key] = false;
 });
 
-requestAnimationFrame(gameLoop);
+requestAnimationFrame(gameLoop); */
 
 /* const game = document.querySelector("#game");
 
