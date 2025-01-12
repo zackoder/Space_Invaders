@@ -56,6 +56,8 @@ body {
   display: none;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+  gap: 20px;
   width: 100%;
   height: 100%;
   background-color: black;
@@ -64,6 +66,20 @@ body {
   font-size: 2.5rem;
   letter-spacing: 4px;
   word-break: break-word;
+}
+
+button {
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  background-color: rgb(121, 190, 212);
+  transition: background 300ms ease;
+  font-weight: 600;
+  color: rgb(27, 26, 26);
+}
+
+button:hover {
+  background-color: rgb(68, 123, 141);
 }
 
 /* #game div {

@@ -1,5 +1,8 @@
 const game = document.getElementById("game");
 const player = document.querySelector(".player");
+const lay_out_Pausse = document.querySelector(".lay_out_Pausse");
+const lay_out_GameOver = document.querySelector(".lay_out_GameOver");
+const lay_out_YouWin = document.querySelector(".lay_out_YouWin");
 
 let win = false;
 let topp = 0;
@@ -80,12 +83,11 @@ function updateEnemies() {
 
     if (currentTop >= 550) {
       if (!isGameOver) {
-        endGame("Game Over");
+        endGame(lay_out_GameOver);
       }
     }
   });
 
-  // Continue animation
   enemiesAnimationId = requestAnimationFrame(updateEnemies);
 }
 
@@ -122,17 +124,14 @@ function updateBullets() {
         console.log("after: ", enemies);
         score += 10;
         currentScoreDisplay.innerHTML = `Score: ${score}`;
-        // collided = true;
         break;
       }
     }
 
     if (enemies.length === 0) {
-      endGame("You Win!");
+      endGame(lay_out_YouWin);
       return;
     }
-
-    // if (collided) continue;
   }
 
   bulletsAnimationId = requestAnimationFrame(updateBullets);
@@ -167,10 +166,9 @@ function checkCollision(obj1, obj2) {
   );
 }
 
-function endGame(message) {
+function endGame(element) {
   isGameOver = true;
-  layout.style.display = "flex";
-  layout.innerText = message;
+  element.style.display = "flex";
 
   if (score > bestScore) {
     bestScore = score;
@@ -215,7 +213,9 @@ function resetGame() {
   enemies = [];
   bulletPosition = [];
   drawEnemies();
-  layout.style.display = "none";
+  lay_out_GameOver.style.display = "none";
+  lay_out_YouWin.style.display = "none";
+  lay_out_Pausse.style.display = "none";
 
   cancelAnimations();
 
@@ -238,25 +238,24 @@ document.addEventListener("keydown", (e) => {
   keysPressed[e.key] = true;
 
   if (e.key === " " || e.code === "Space") {
-    fireBullet();
+    if (!isPaused) fireBullet();
   }
 
-  if (e.key.toLowerCase() === "p") {
+  if (e.key.toLowerCase() === "p" && !isGameOver && !win) {
     isPaused = !isPaused;
     if (!isPaused) {
-      layout.style.display = "none";
+      lay_out_Pausse.style.display = "none";
 
       cancelAnimations();
 
       enemiesAnimationId = requestAnimationFrame(updateEnemies);
       bulletsAnimationId = requestAnimationFrame(updateBullets);
       playerAnimationId = requestAnimationFrame(handlePlayerMovement);
+    } else {
+       lay_out_Pausse.style.display = "flex";
     }
   }
-
-  if ((e.key === "r" || e.code === "R") && isGameOver) {
-    resetGame();
-  }
+  // resetGame();
 });
 
 document.addEventListener("keyup", (e) => {
