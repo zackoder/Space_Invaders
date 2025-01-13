@@ -15,21 +15,21 @@
     <div id="game">
       <div class="lay_out_Pausse lay_out">
         <div>
-          <button>restart</button>
-          <button>continue</button>
+          <button onclick="resetGame()">restart</button>
+          <button onclick="startgame()">continue</button>
         </div>
       </div>
       <div class="lay_out_GameOver lay_out">
         <h2>Game Over</h2>
-        <button>restart</button>
+        <button onclick="resetGame()">restart</button>
       </div>
       <div class="lay_out_YouWin lay_out">
         <h2>You Win</h2>
-        <button>restart</button>
+        <button onclick="resetGame()">restart</button>
       </div>
-      <img data-player-x="" class="player" src="./images/player.png" />
+      <img class="player" src="./images/player.png" />
     </div>
-    <script src="./index.js"></script>
+    <script src="./index.js" defer></script>
     <!-- <script type="module" src="test.js"></script> -->
   </body>
 </html>
