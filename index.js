@@ -3,9 +3,13 @@ const player = document.querySelector(".player");
 const lay_out_Pausse = document.querySelector(".lay_out_Pausse");
 const lay_out_GameOver = document.querySelector(".lay_out_GameOver");
 const lay_out_YouWin = document.querySelector(".lay_out_YouWin");
+const livesspan = document.querySelector(".livesspan");
+const levelspan = document.querySelector(".levelspan");
 
+let lives = 3;
+let level = 0;
 let win = false;
-let topp = 0;
+let topp = 30;
 let left = 0;
 let enemies = [];
 let bullets = [];
@@ -17,6 +21,12 @@ let enemesPositions = [];
 
 let playerPosition = 255;
 let keysPressed = {};
+let enemyDirection = 1;
+const enemySpeed = 2;
+const bulletSpeed = 10;
+const playerSpeed = 3;
+
+let gamewidth = game.clientWidth - 50;
 
 const scoreDisplay = document.querySelector("#score");
 const bestScoreDisplay = document.querySelector(".bestscore");
@@ -31,8 +41,11 @@ let enemiesAnimationId = null;
 let bulletsAnimationId = null;
 let playerAnimationId = null;
 
+livesspan.innerHTML = lives;
+levelspan.innerHTML = level;
+
 function drawEnemies() {
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 3 + level; i++) {
     for (let j = 0; j < 7; j++) {
       const alien = new Image();
       const enemyType = Math.ceil(Math.random() * 3);
@@ -42,53 +55,66 @@ function drawEnemies() {
       alien.style.transform = `translate(${left}px, ${topp}px)`;
       let enemyPosition = { Left: left, Top: topp };
       enemesPositions.push(enemyPosition);
-      left += 44;
+      left += 55;
       game.appendChild(alien);
       enemies.push(alien);
     }
     left = 0;
-    topp += 30;
+    topp += 35;
   }
 }
 
-let enemyDirection = 1;
-const enemySpeed = 1;
-const bulletSpeed = 10;
-const playerSpeed = 3;
-
 drawEnemies();
 
+let isMovingDown = false;
+
 function updateEnemies() {
-  if (isGameOver || isPaused) return;
+  if (isGameOver || isPaused || isMovingDown) return;
 
   enemies.forEach((enemy, i) => {
     let currentLeft = enemesPositions[i].Left;
     let currentTop = enemesPositions[i].Top;
-
     let newLeft = currentLeft + enemySpeed * enemyDirection;
 
-    if (newLeft <= 0 || newLeft >= 550) {
+    if (newLeft <= 0 || newLeft >= gamewidth) {
       enemyDirection *= -1;
-      enemies.forEach((e, ii) => {
-        let eTop = enemesPositions[ii].Top;
-        e.style.transform = `translate(${enemesPositions[ii].Left}px, ${
-          eTop + 5
-        }px)`;
-        enemesPositions[ii].Top += 5;
+      isMovingDown = true;
+      moveEnemiesDownSmoothly(20, () => {
+        isMovingDown = false;
       });
+      return;
     }
 
     enemesPositions[i].Left = newLeft;
     enemy.style.transform = `translate(${newLeft}px, ${currentTop}px)`;
 
-    if (currentTop >= 550) {
+    if (currentTop >= 520) {
       if (!isGameOver) {
-        endGame(lay_out_GameOver);
+        Gameover(lay_out_GameOver);
       }
     }
   });
-
   enemiesAnimationId = requestAnimationFrame(updateEnemies);
+}
+
+function moveEnemiesDownSmoothly(steps, callback) {
+  let step = 0;
+  function moveStep() {
+    if (step >= steps) {
+      if (callback) callback();
+      enemiesAnimationId = requestAnimationFrame(updateEnemies);
+      return;
+    }
+
+    enemies.forEach((enemy, i) => {
+      enemesPositions[i].Top += 1;
+      enemy.style.transform = `translate(${enemesPositions[i].Left}px, ${enemesPositions[i].Top}px)`;
+    });
+
+    step++;
+    requestAnimationFrame(moveStep);
+  }
+  moveStep();
 }
 
 function updateBullets() {
@@ -98,19 +124,15 @@ function updateBullets() {
     let bullet = bullets[i];
     let bulletTop = bulletPosition[i].Top;
     let bulletLeft = bulletPosition[i].Left;
-
     bulletTop -= bulletSpeed;
     bullet.style.transform = `translate(${bulletLeft}px, ${bulletTop}px)`;
     bulletPosition[i].Top = bulletTop;
-
     if (bulletTop <= 0) {
       bullet.remove();
       bullets.splice(i, 1);
       bulletPosition.splice(i, 1);
       continue;
     }
-
-    // let collided = false;
     for (let j = enemies.length - 1; j >= 0; j--) {
       let enemy = enemies[j];
       if (checkCollision(bullet, enemy)) {
@@ -125,14 +147,34 @@ function updateBullets() {
         break;
       }
     }
-
     if (enemies.length === 0) {
-      endGame(lay_out_YouWin);
-      return;
+      nexlevel(lay_out_YouWin);
     }
   }
-
   bulletsAnimationId = requestAnimationFrame(updateBullets);
+}
+
+function nexlevel(LayOut) {
+  level++;
+  resetGame();
+  levelspan.innerHTML = level;
+  checkScore();
+  if (level === 5) {
+    win = true;
+    cancelAnimations();
+    checkScore();
+    LayOut.style.display = "flex";
+    score = 0;
+    level = 0;
+  }
+}
+
+function checkScore() {
+  if (score > bestScore) {
+    bestScore = score;
+    bestScoreDisplay.innerHTML = `Best Score: ${bestScore}`;
+    localStorage.setItem("bestScore", bestScore);
+  }
 }
 
 function handlePlayerMovement() {
@@ -164,17 +206,18 @@ function checkCollision(obj1, obj2) {
   );
 }
 
-function endGame(element) {
-  isGameOver = true;
-  element.style.display = "flex";
-
-  if (score > bestScore) {
-    bestScore = score;
-    bestScoreDisplay.innerHTML = `Best Score: ${bestScore}`;
-    localStorage.setItem("bestScore", bestScore);
+function Gameover(element) {
+  lives--;
+  livesspan.innerHTML = lives;
+  resetGame();
+  if (lives === 0) {
+    isGameOver = true;
+    score = 0;
+    cancelAnimations();
+    element.style.display = "flex";
+    checkScore();
+    lives = 3;
   }
-
-  cancelAnimations();
 }
 
 let bulletPosition = [];
@@ -196,12 +239,11 @@ function fireBullet() {
 }
 
 function resetGame() {
-  topp = 0;
+  topp = 20;
   left = 0;
   win = false;
   isGameOver = false;
   isPaused = false;
-  score = 0;
   enemesPositions = [];
   bulletPosition = [];
   enemyDirection = 1;
@@ -254,10 +296,14 @@ document.addEventListener("keydown", (e) => {
       lay_out_Pausse.style.display = "flex";
     }
   }
-  if (e.key.toLowerCase() === "r") resetGame();
 });
 
 function startgame() {
+  if (bestScore < score) {
+    bestScore = score;
+    bestScoreDisplay.innerHTML = `Best Score: ${bestScore}`;
+    localStorage.setItem("bestScore", bestScore);
+  }
   isPaused = !isPaused;
   lay_out_Pausse.style.display = "none";
 

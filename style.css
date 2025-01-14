@@ -68,6 +68,21 @@ body {
   word-break: break-word;
 }
 
+.lives,
+.levels {
+  position: absolute;
+  color: white;
+  font-size: 1.3rem;
+}
+
+.lives {
+  transform: translate(5px, 0);
+}
+
+.levels {
+  transform: translate(519px, 0);
+}
+
 button {
   padding: 10px;
   border-radius: 10px;
