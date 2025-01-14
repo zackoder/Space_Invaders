@@ -23,7 +23,7 @@ let playerPosition = 255;
 let keysPressed = {};
 let enemyDirection = 1;
 const enemySpeed = 2;
-const bulletSpeed = 10;
+const bulletSpeed = 5;
 const playerSpeed = 3;
 
 let gamewidth = game.clientWidth - 50;
@@ -40,6 +40,7 @@ let firingCooldown = false;
 let enemiesAnimationId = null;
 let bulletsAnimationId = null;
 let playerAnimationId = null;
+let counterid = null;
 
 livesspan.innerHTML = lives;
 levelspan.innerHTML = level;
@@ -116,8 +117,11 @@ function moveEnemiesDownSmoothly(steps, callback) {
   }
   moveStep();
 }
-
+let timer = 0;
+let timerspan = document.querySelector(".timer");
+timerspan.innerHTML = timer;
 function updateBullets() {
+  console.log();
   if (isGameOver || isPaused) return;
 
   for (let i = bullets.length - 1; i >= 0; i--) {
@@ -148,13 +152,20 @@ function updateBullets() {
       }
     }
     if (enemies.length === 0) {
-      nexlevel(lay_out_YouWin);
+      nextlevel(lay_out_YouWin);
     }
   }
   bulletsAnimationId = requestAnimationFrame(updateBullets);
 }
 
-function nexlevel(LayOut) {
+function counter() {
+  if (isPaused || isGameOver) return;
+  let startTime = performance.now();
+  timerspan.innerHTML = Math.ceil(startTime / 1000);
+  counterid = requestAnimationFrame(counter);
+}
+
+function nextlevel(LayOut) {
   level++;
   resetGame();
   levelspan.innerHTML = level;
@@ -166,6 +177,7 @@ function nexlevel(LayOut) {
     LayOut.style.display = "flex";
     score = 0;
     level = 0;
+    levelspan.innerHTML = level;
   }
 }
 
@@ -223,18 +235,23 @@ function Gameover(element) {
 let bulletPosition = [];
 
 function fireBullet() {
-  if (!firingCooldown) {
-    const playerLeft = playerPosition + 23;
-    const bullet = document.createElement("div");
-    bullet.style.transform = `translate(${playerLeft}px, 550px)`;
-    let bulletP = { Left: playerLeft, Top: 550 };
+  if (isPaused) return;
+  console.log(keysPressed[" "]);
 
-    bullet.className = "bullet";
-    game.appendChild(bullet);
-    bulletPosition.push(bulletP);
-    bullets.push(bullet);
-    firingCooldown = true;
-    setTimeout(() => (firingCooldown = false), 200);
+  if (keysPressed[" "]) {
+    if (!firingCooldown) {
+      const playerLeft = playerPosition + 23;
+      const bullet = document.createElement("div");
+      bullet.style.transform = `translate(${playerLeft}px, 550px)`;
+      let bulletP = { Left: playerLeft, Top: 550 };
+
+      bullet.className = "bullet";
+      game.appendChild(bullet);
+      bulletPosition.push(bulletP);
+      bullets.push(bullet);
+      firingCooldown = true;
+      setTimeout(() => (firingCooldown = false), 300);
+    }
   }
 }
 
@@ -269,18 +286,17 @@ function cancelAnimations() {
   if (enemiesAnimationId !== null) cancelAnimationFrame(enemiesAnimationId);
   if (bulletsAnimationId !== null) cancelAnimationFrame(bulletsAnimationId);
   if (playerAnimationId !== null) cancelAnimationFrame(playerAnimationId);
+  if (counterid !== null) cancelAnimationFrame(counterid);
 
   enemiesAnimationId = null;
   bulletsAnimationId = null;
   playerAnimationId = null;
+  counterid = null;
 }
 
 document.addEventListener("keydown", (e) => {
   keysPressed[e.key] = true;
-
-  if (e.key === " " || e.code === "Space") {
-    if (!isPaused) fireBullet();
-  }
+  fireBullet();
 
   if (e.key.toLowerCase() === "p" && !isGameOver && !win) {
     isPaused = !isPaused;
@@ -292,6 +308,7 @@ document.addEventListener("keydown", (e) => {
       enemiesAnimationId = requestAnimationFrame(updateEnemies);
       bulletsAnimationId = requestAnimationFrame(updateBullets);
       playerAnimationId = requestAnimationFrame(handlePlayerMovement);
+      counterid = requestAnimationFrame(counter);
     } else {
       lay_out_Pausse.style.display = "flex";
     }
@@ -312,12 +329,15 @@ function startgame() {
   enemiesAnimationId = requestAnimationFrame(updateEnemies);
   bulletsAnimationId = requestAnimationFrame(updateBullets);
   playerAnimationId = requestAnimationFrame(handlePlayerMovement);
+  counterid = requestAnimationFrame(counter);
 }
 
 document.addEventListener("keyup", (e) => {
   keysPressed[e.key] = false;
+  console.log("hello");
 });
 
 enemiesAnimationId = requestAnimationFrame(updateEnemies);
 bulletsAnimationId = requestAnimationFrame(updateBullets);
 playerAnimationId = requestAnimationFrame(handlePlayerMovement);
+counterid = requestAnimationFrame(counter);
