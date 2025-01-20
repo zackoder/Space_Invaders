@@ -42,7 +42,7 @@ body {
 }
 
 #game {
-  position: relative;
+  /* position: relative; */
   box-shadow: 0 0 10px 10px black;
   height: 600px;
   width: 600px;
@@ -56,7 +56,6 @@ body {
   position: relative;
   transform: translate(0, 35px);
   width: 380px;
-  position: absolute;
 }
 
 .lay_out {
@@ -94,7 +93,7 @@ button {
   padding: 10px;
   border-radius: 10px;
   font-size: 1.2rem;
-  background-color: rgb(121, 190, 212);
+  background-color: rgb(62, 140, 167);
   transition: background 300ms ease;
   font-weight: 600;
   color: rgb(27, 26, 26);
