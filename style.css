@@ -52,6 +52,13 @@ body {
   overflow: hidden;
 }
 
+.alienscontainer {
+  position: relative;
+  transform: translate(0, 35px);
+  width: 380px;
+  position: absolute;
+}
+
 .lay_out {
   display: none;
   justify-content: center;
