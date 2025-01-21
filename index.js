@@ -5,7 +5,6 @@ const lay_out_GameOver = document.querySelector(".lay_out_GameOver");
 const lay_out_YouWin = document.querySelector(".lay_out_YouWin");
 const livesspan = document.querySelector(".livesspan");
 const levelspan = document.querySelector(".levelspan");
-const scoreDisplay = document.querySelector("#score");
 const bestScoreDisplay = document.querySelector(".bestscore");
 const currentScoreDisplay = document.querySelector(".score");
 const alienscontainer = document.querySelector(".alienscontainer");
@@ -17,7 +16,7 @@ let left = 0;
 let score = 0;
 let playerPosition = 255;
 let enemyDirection = 1;
-const enemySpeed = 10;
+const enemySpeed = 3;
 const bulletSpeed = 5;
 const playerSpeed = 3;
 let gamewidth = game.clientWidth;
@@ -25,6 +24,8 @@ let bestScore = localStorage.getItem("bestScore") || 0;
 let win = false;
 let isPaused = true;
 let isGameOver = false;
+let firingCooldown = false;
+let isMovingDown = false;
 let enemies = [];
 let bullets = [];
 let enemesPositions = [];
@@ -35,12 +36,10 @@ bestScoreDisplay.innerHTML = `Best Score: ${bestScore}`;
 currentScoreDisplay.innerHTML = `Score: ${score}`;
 
 const layout = document.querySelector(".lay_out");
-let firingCooldown = false;
 
 let enemiesAnimationId = null;
 let bulletsAnimationId = null;
 let playerAnimationId = null;
-let counterid = null;
 
 livesspan.innerHTML = lives;
 levelspan.innerHTML = level;
@@ -52,7 +51,6 @@ function drawEnemies() {
       const enemyType = Math.ceil(Math.random() * 3);
       alien.src = `./images/enemy${enemyType}.png`;
       alien.className = "alien";
-      alien.style.position = "absolute";
       alien.style.transform = `translate(${left}px, ${topp}px)`;
       let enemyPosition = { Left: left, Top: topp };
       enemesPositions.push(enemyPosition);
@@ -67,8 +65,6 @@ function drawEnemies() {
 
 drawEnemies();
 
-let isMovingDown = false;
-
 function updateEnemies() {
   if (isGameOver || isPaused || isMovingDown) return;
 
@@ -79,7 +75,7 @@ function updateEnemies() {
   aliensContainerPosition.Left = newLeft;
   alienscontainer.style.transform = `translate(${newLeft}px, ${currentTop}px)`;
 
-  if (newLeft <= 0 || newLeft + alienscontainer.clientWidth >= gamewidth) {
+  if (newLeft <= 0 || newLeft + 375 >= gamewidth) {
     isMovingDown = true;
     moveEnemiesDownSmoothly(20, () => {
       isMovingDown = false;
@@ -87,15 +83,8 @@ function updateEnemies() {
     enemyDirection *= -1;
     return;
   }
-
-  // if (currentTop >= 520) {
-  //   if (!isGameOver) {
-  //     Gameover(lay_out_GameOver);
-  //   }
-  // }
   enemies.forEach((enemy) => {
     let enemyrct = enemy.getBoundingClientRect();
-    console.log(enemyrct.y);
     if (enemyrct.y >= 745) {
       if (!isGameOver) {
         Gameover(lay_out_GameOver);
@@ -124,12 +113,12 @@ function moveEnemiesDownSmoothly(steps, callback) {
   }
   moveStep();
 }
+
 let timer = 0;
 let timerspan = document.querySelector(".timer");
 timerspan.innerHTML = timer;
 
 function updateBullets() {
-  console.log();
   if (isGameOver || isPaused) return;
 
   for (let i = bullets.length - 1; i >= 0; i--) {
@@ -170,27 +159,9 @@ let pausedTime = 0;
 let totalElapsedTime = 0;
 let lastResumeTime = 0;
 
-function counter() {
-  if (isGameOver || win) return;
-
-  if (!isPaused) {
-    if (lastResumeTime === 0) {
-      lastResumeTime = performance.now();
-    }
-    const currentTime = performance.now();
-    totalElapsedTime += currentTime - lastResumeTime;
-    lastResumeTime = currentTime;
-    timerspan.innerHTML = Math.ceil(totalElapsedTime / 1000);
-    counterid = requestAnimationFrame(counter);
-  } else {
-    lastResumeTime = performance.now();
-  }
-}
-
 function nextlevel(LayOut) {
   level++;
   resetGame();
-  alienscontainer.style.height = `${35 * (3 + level)}px`;
   levelspan.innerHTML = level;
   checkScore();
   if (level === 5) {
@@ -253,6 +224,7 @@ function Gameover(element) {
     element.style.display = "flex";
     checkScore();
     lives = 3;
+    level = 0;
   }
 }
 
@@ -281,7 +253,7 @@ function resetGame() {
   left = 0;
   win = false;
   isGameOver = false;
-  isPaused = true;
+  isPaused = false;
   enemesPositions = [];
   bulletPosition = [];
   enemyDirection = 1;
@@ -297,7 +269,6 @@ function resetGame() {
   lay_out_GameOver.style.display = "none";
   lay_out_YouWin.style.display = "none";
   lay_out_Pausse.style.display = "none";
-
   cancelAnimations();
 
   enemiesAnimationId = requestAnimationFrame(updateEnemies);
@@ -355,7 +326,6 @@ document.addEventListener("keyup", (e) => {
 enemiesAnimationId = requestAnimationFrame(updateEnemies);
 bulletsAnimationId = requestAnimationFrame(updateBullets);
 playerAnimationId = requestAnimationFrame(handlePlayerMovement);
-requestAnimationFrame(counter);
 
 /* const game = document.getElementById("game");
 const player = document.querySelector(".player");

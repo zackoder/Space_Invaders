@@ -42,7 +42,6 @@ body {
 }
 
 #game {
-  /* position: relative; */
   box-shadow: 0 0 10px 10px black;
   height: 600px;
   width: 600px;
@@ -55,7 +54,7 @@ body {
 .alienscontainer {
   position: relative;
   transform: translate(0, 35px);
-  width: 380px;
+
 }
 
 .lay_out {
