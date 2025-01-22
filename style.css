@@ -132,3 +132,8 @@ button:hover {
   height: 30px;
   width: 44px;
 }
+
+
+@media (min-width: 600px) {
+  
+}
