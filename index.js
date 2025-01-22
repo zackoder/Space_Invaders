@@ -33,7 +33,11 @@ let keysPressed = {};
 let aliensContainerPosition = { Left: 0, Top: 35 };
 
 bestScoreDisplay.innerHTML = `Best Score: ${bestScore}`;
-currentScoreDisplay.innerHTML = `Score: ${score}`;
+function score() {
+  currentScoreDisplay.innerHTML = `Score: ${score}`;
+  requestAnimationFrame(score);
+}
+requestAnimationFrame(score);
 
 const layout = document.querySelector(".lay_out");
 
