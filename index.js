@@ -45,6 +45,7 @@ const layout = document.querySelector(".lay_out");
 let enemiesAnimationId = null;
 let bulletsAnimationId = null;
 let playerAnimationId = null;
+let timerId = null;
 
 livesspan.innerHTML = lives;
 levelspan.innerHTML = level;
@@ -55,6 +56,8 @@ restbtn.forEach((btn) => {
     lives = 3;
     livesspan.innerHTML = lives;
     levelspan.innerHTML = level;
+    timer = 0;
+    timerspan.innerHTML = "00:00";
     resetGame();
   });
 });
@@ -129,8 +132,32 @@ function moveEnemiesDownSmoothly(steps, callback) {
 }
 
 let timer = 0;
+let lastTime = null;
+
+function Timer(currentTime) {
+  if (isPaused || isGameOver || win) return;
+
+  if (lastTime === null) {
+    lastTime = currentTime;
+  } else {
+    const deltaTime = currentTime - lastTime;
+    if (deltaTime >= 1000) {
+      timer++;
+      const minutes = Math.floor(timer / 60);
+      const seconds = timer % 60;
+
+      timerspan.innerHTML =
+        minutes.toString().padStart(2, "0") +
+        ":" +
+        seconds.toString().padStart(2, "0");
+
+      lastTime = currentTime;
+    }
+  }
+  requestAnimationFrame(Timer);
+}
+
 let timerspan = document.querySelector(".timer");
-timerspan.innerHTML = timer;
 
 function updateBullets() {
   if (isGameOver || isPaused) return;
@@ -168,10 +195,6 @@ function updateBullets() {
   }
   bulletsAnimationId = requestAnimationFrame(updateBullets);
 }
-
-let pausedTime = 0;
-let totalElapsedTime = 0;
-let lastResumeTime = 0;
 
 function nextlevel(LayOut) {
   level++;
@@ -265,6 +288,7 @@ function fireBullet() {
 }
 
 function resetGame() {
+  cancelAnimations();
   topp = 0;
   left = 0;
   win = false;
@@ -286,11 +310,7 @@ function resetGame() {
   lay_out_YouWin.style.display = "none";
   lay_out_Pausse.style.display = "none";
 
-  cancelAnimations();
-
-  enemiesAnimationId = requestAnimationFrame(updateEnemies);
-  bulletsAnimationId = requestAnimationFrame(updateBullets);
-  playerAnimationId = requestAnimationFrame(handlePlayerMovement);
+  requestAnemations();
 }
 
 function cancelAnimations() {
@@ -313,10 +333,7 @@ function startgame() {
   lay_out_Pausse.style.display = "none";
 
   cancelAnimations();
-
-  enemiesAnimationId = requestAnimationFrame(updateEnemies);
-  bulletsAnimationId = requestAnimationFrame(updateBullets);
-  playerAnimationId = requestAnimationFrame(handlePlayerMovement);
+  requestAnemations();
 }
 
 document.addEventListener("keydown", (e) => {
@@ -327,9 +344,7 @@ document.addEventListener("keydown", (e) => {
     if (!isPaused) {
       lay_out_Pausse.style.display = "none";
       cancelAnimations();
-      enemiesAnimationId = requestAnimationFrame(updateEnemies);
-      bulletsAnimationId = requestAnimationFrame(updateBullets);
-      playerAnimationId = requestAnimationFrame(handlePlayerMovement);
+      requestAnemations();
     } else {
       lay_out_Pausse.style.display = "flex";
     }
@@ -340,6 +355,9 @@ document.addEventListener("keyup", (e) => {
   keysPressed[e.key] = false;
 });
 
-enemiesAnimationId = requestAnimationFrame(updateEnemies);
-bulletsAnimationId = requestAnimationFrame(updateBullets);
-playerAnimationId = requestAnimationFrame(handlePlayerMovement);
+function requestAnemations() {
+  enemiesAnimationId = requestAnimationFrame(updateEnemies);
+  bulletsAnimationId = requestAnimationFrame(updateBullets);
+  playerAnimationId = requestAnimationFrame(handlePlayerMovement);
+  timerId = requestAnimationFrame(Timer);
+}
