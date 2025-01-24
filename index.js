@@ -350,7 +350,8 @@ function requestAnimations() {
 let count = 0;
 let timer_counter = null;
 let timerspan = document.querySelector(".timer");
-
+let minute = 0;
+let second = 0;
 function incrementCounter() {
   if (isPaused) {
     clearTimeout(timer_counter);
@@ -358,10 +359,15 @@ function incrementCounter() {
     return
   } else {
     count++;
-    timerspan.textContent = count;
-    timer_counter = setTimeout(incrementCounter, 1000);
-
+    if (count % 60 === 0) {
+      minute = count / 60
+      second = count % 60
+    } else {
+      second = count % 60
+    }
   }
+  timerspan.textContent = `${minute}:${second}`;
+  timer_counter = setTimeout(incrementCounter, 1000);
 
 }
 
