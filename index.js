@@ -354,7 +354,9 @@ let timer_counter = null;
 let timerspan = document.querySelector(".timer");
 let minute = 0;
 let second = 0;
+
 function incrementCounter() {
+
   if (isPaused) {
     clearTimeout(timer_counter);
     timer_counter = null;
@@ -368,19 +370,22 @@ function incrementCounter() {
       // minute = Math.floor(count / 60);
       second = count % 60;
     }
-    if (second >=10){
+    if (second >= 10) {
       timerspan.textContent = `0${minute}:${second}`;
-    } else if (second < 10){
+    } else if (second < 10) {
       timerspan.textContent = `0${minute}:0${second}`;
     }
     timer_counter = setTimeout(incrementCounter, 1000);
   }
-
-
 }
 
 function startIncrement() {
-  timerspan.textContent = count;
+  // timerspan.textContent = count;
+  if (second >= 10) {
+    timerspan.textContent = `0${minute}:${second}`;
+  } else if (second < 10) {
+    timerspan.textContent = `0${minute}:0${second}`;
+  }
   if (timer_counter === null) {
     timer_counter = setTimeout(incrementCounter, 1000);
   }
