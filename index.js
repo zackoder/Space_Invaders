@@ -368,7 +368,11 @@ function incrementCounter() {
       // minute = Math.floor(count / 60);
       second = count % 60;
     }
-    timerspan.textContent = `${minute}:${second}`;
+    if (second >=10){
+      timerspan.textContent = `0${minute}:${second}`;
+    } else if (second < 10){
+      timerspan.textContent = `0${minute}:0${second}`;
+    }
     timer_counter = setTimeout(incrementCounter, 1000);
   }
 
