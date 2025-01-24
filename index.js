@@ -45,6 +45,7 @@ const layout = document.querySelector(".lay_out");
 let enemiesAnimationId = null;
 let bulletsAnimationId = null;
 let playerAnimationId = null;
+let startIncrementId = null;
 
 livesspan.innerHTML = lives;
 levelspan.innerHTML = level;
@@ -53,8 +54,9 @@ restbtn.forEach((btn) => {
   btn.addEventListener("click", () => {
     level = 0;
     lives = 3;
-    livesspan.innerHTML = lives;
-    levelspan.innerHTML = level;
+    count = 0;
+    livesspan.textContent = lives;
+    levelspan.textContent = level;
     resetGame();
   });
 });
@@ -98,7 +100,7 @@ function updateEnemies() {
     enemyDirection *= -1;
     return;
   }
-  enemies.forEach((enemy, i) => {
+  enemies.forEach((_, i) => {
     if (enemesPositions[i].Top >= 490) {
       if (!isGameOver) {
         Gameover(lay_out_GameOver);
@@ -128,10 +130,6 @@ function moveEnemiesDownSmoothly(steps, callback) {
   moveStep();
 }
 
-let timer = 0;
-let timerspan = document.querySelector(".timer");
-timerspan.innerHTML = timer;
-
 function updateBullets() {
   if (isGameOver || isPaused) return;
 
@@ -158,7 +156,7 @@ function updateBullets() {
         bulletPosition.splice(i, 1);
         enemies.splice(j, 1);
         score += 10;
-        currentScoreDisplay.innerHTML = `Score: ${score}`;
+        //currentScoreDisplay.innerHTML = `Score: ${score}`;
         break;
       }
     }
@@ -181,6 +179,9 @@ function nextlevel(LayOut) {
   if (level === 5) {
     win = true;
     cancelAnimations();
+    stopIncrement();
+    cancelAnimationFrame(startIncrementId);
+    startIncrementId = null;
     checkScore();
     LayOut.style.display = "flex";
     score = 0;
@@ -201,16 +202,14 @@ function checkScore() {
 function handlePlayerMovement() {
   if (isGameOver || isPaused) return;
   if (keysPressed["ArrowLeft"] && playerPosition > 0) {
-    player.style.transform = `translate(${
-      playerPosition - playerSpeed
-    }px, 550px)`;
     playerPosition -= playerSpeed;
+    player.style.transform = `translate(${playerPosition
+      }px, 550px)`;
   }
   if (keysPressed["ArrowRight"] && playerPosition < 550) {
-    player.style.transform = `translate(${
-      playerPosition + playerSpeed
-    }px, 550px)`;
     playerPosition += playerSpeed;
+    player.style.transform = `translate(${playerPosition
+      }px, 550px)`;
   }
   if (keysPressed[" "]) fireBullet();
   playerAnimationId = requestAnimationFrame(handlePlayerMovement);
@@ -232,9 +231,11 @@ function Gameover(element) {
   lives--;
   resetGame();
   livesspan.innerHTML = lives;
-  console.log("lives from game over function: ", lives);
   if (lives === 0) {
     isGameOver = true;
+    stopIncrement();
+    cancelAnimationFrame(startIncrementId);
+    startIncrementId = null;
     score = 0;
     cancelAnimations();
     element.style.display = "flex";
@@ -288,9 +289,7 @@ function resetGame() {
 
   cancelAnimations();
 
-  enemiesAnimationId = requestAnimationFrame(updateEnemies);
-  bulletsAnimationId = requestAnimationFrame(updateBullets);
-  playerAnimationId = requestAnimationFrame(handlePlayerMovement);
+  requestAnimations()
 }
 
 function cancelAnimations() {
@@ -314,24 +313,23 @@ function startgame() {
 
   cancelAnimations();
 
-  enemiesAnimationId = requestAnimationFrame(updateEnemies);
-  bulletsAnimationId = requestAnimationFrame(updateBullets);
-  playerAnimationId = requestAnimationFrame(handlePlayerMovement);
+  requestAnimations()
 }
-
+let currentTimer = 0;
 document.addEventListener("keydown", (e) => {
   keysPressed[e.key] = true;
+  currentTimer = parseInt(timerspan.textContent, 10)
+  console.log(currentTimer);
 
   if (e.key.toLowerCase() === "p" && !isGameOver && !win) {
     isPaused = !isPaused;
     if (!isPaused) {
       lay_out_Pausse.style.display = "none";
       cancelAnimations();
-      enemiesAnimationId = requestAnimationFrame(updateEnemies);
-      bulletsAnimationId = requestAnimationFrame(updateBullets);
-      playerAnimationId = requestAnimationFrame(handlePlayerMovement);
+      requestAnimations()
     } else {
       lay_out_Pausse.style.display = "flex";
+      stopIncrement();
     }
   }
 });
@@ -340,6 +338,43 @@ document.addEventListener("keyup", (e) => {
   keysPressed[e.key] = false;
 });
 
-enemiesAnimationId = requestAnimationFrame(updateEnemies);
-bulletsAnimationId = requestAnimationFrame(updateBullets);
-playerAnimationId = requestAnimationFrame(handlePlayerMovement);
+function requestAnimations() {
+  enemiesAnimationId = requestAnimationFrame(updateEnemies);
+  bulletsAnimationId = requestAnimationFrame(updateBullets);
+  playerAnimationId = requestAnimationFrame(handlePlayerMovement);
+  startIncrementId = requestAnimationFrame(startIncrement)
+
+}
+
+// Counter 
+let count = 0;
+let timer_counter = null;
+let timerspan = document.querySelector(".timer");
+
+function incrementCounter() {
+  if (isPaused) {
+    clearTimeout(timer_counter);
+    timer_counter = null;
+    return
+  } else {
+    count++;
+    timerspan.textContent = count;
+    timer_counter = setTimeout(incrementCounter, 1000);
+
+  }
+
+}
+
+function startIncrement() {
+  timerspan.textContent = count;
+  if (timer_counter === null) {
+    timer_counter = setTimeout(incrementCounter, 1000);
+  }
+}
+
+function stopIncrement() {
+  clearTimeout(timer_counter);
+  timer_counter = null;
+}
+
+
