@@ -55,6 +55,8 @@ restbtn.forEach((btn) => {
     level = 0;
     lives = 3;
     count = 0;
+    second = 0;
+    minute = 0;
     livesspan.textContent = lives;
     levelspan.textContent = level;
     resetGame();
@@ -326,7 +328,7 @@ document.addEventListener("keydown", (e) => {
     if (!isPaused) {
       lay_out_Pausse.style.display = "none";
       cancelAnimations();
-      requestAnimations()
+      requestAnimations();
     } else {
       lay_out_Pausse.style.display = "flex";
       stopIncrement();
@@ -360,14 +362,16 @@ function incrementCounter() {
   } else {
     count++;
     if (count % 60 === 0) {
-      minute = count / 60
-      second = count % 60
+      minute = count / 60;
+      second = count % 60;
     } else {
-      second = count % 60
+      // minute = Math.floor(count / 60);
+      second = count % 60;
     }
+    timerspan.textContent = `${minute}:${second}`;
+    timer_counter = setTimeout(incrementCounter, 1000);
   }
-  timerspan.textContent = `${minute}:${second}`;
-  timer_counter = setTimeout(incrementCounter, 1000);
+
 
 }
 
@@ -379,6 +383,7 @@ function startIncrement() {
 }
 
 function stopIncrement() {
+  timerspan.textContent = `${minute}:${second}`;
   clearTimeout(timer_counter);
   timer_counter = null;
 }
