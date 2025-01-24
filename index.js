@@ -387,7 +387,6 @@ function startIncrement() {
 }
 
 function stopIncrement() {
-  timerspan.textContent = `${minute}:${second}`;
   clearTimeout(timer_counter);
   timer_counter = null;
 }
