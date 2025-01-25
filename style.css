@@ -10,7 +10,6 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: gray;
   overflow: hidden;
   font-family: "Helvetica";
 }
@@ -54,7 +53,6 @@ body {
 .alienscontainer {
   position: relative;
   transform: translate(0, 35px);
-
 }
 
 .lay_out {
@@ -71,6 +69,10 @@ body {
   font-size: 2.5rem;
   letter-spacing: 4px;
   word-break: break-word;
+}
+
+.lay_out_Pausse {
+  display: flex;
 }
 
 .lives,
@@ -133,7 +135,17 @@ button:hover {
   width: 44px;
 }
 
-
-@media (min-width: 600px) {
-  
+.message {
+  z-index: -3;
+  color: white;
+  height: 200%;
+  width: 200%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translate(-50%, -50%);
+  background-color: gray;
 }

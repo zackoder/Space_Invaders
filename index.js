@@ -361,3 +361,24 @@ function requestAnemations() {
   playerAnimationId = requestAnimationFrame(handlePlayerMovement);
   timerId = requestAnimationFrame(Timer);
 }
+
+let message = document.querySelector(".message");
+
+function trackResizing() {
+  setInterval(() => {
+    let windowWidth = window.innerWidth;
+    let windowHeight = window.innerHeight;
+    console.log("height: ", windowHeight);
+    console.log("width: ", windowWidth);
+
+    if (windowHeight <= 740 || windowWidth <= 650) {
+      message.style.zIndex = 1000;
+      isPaused = true;
+      cancelAnimations();
+    } else {
+      message.style.zIndex = -3;
+    }
+  }, 700);
+}
+
+trackResizing();
