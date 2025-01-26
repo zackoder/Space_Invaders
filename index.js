@@ -57,6 +57,7 @@ restbtn.forEach((btn) => {
     count = 0;
     second = 0;
     minute = 0;
+    score = 0;
     livesspan.textContent = lives;
     levelspan.textContent = level;
     resetGame();
@@ -345,6 +346,27 @@ function requestAnimations() {
   playerAnimationId = requestAnimationFrame(handlePlayerMovement);
   startIncrementId = requestAnimationFrame(startIncrement);
 }
+
+const message = document.querySelector(".message");
+
+function trackResizing() {
+  setInterval(() => {
+    let windowWidth = window.innerWidth;
+    let windowHeight = window.innerHeight;
+    if (
+      windowHeight <= windowHeight / 2 + 550 ||
+      windowWidth <= windowWidth / 2 + 480
+    ) {
+      message.style.zIndex = 1000;
+      isPaused = true;
+      cancelAnimations();
+    } else {
+      message.style.zIndex = -3;
+    }
+  }, 200);
+}
+
+trackResizing();
 
 // Counter
 let count = 0;
