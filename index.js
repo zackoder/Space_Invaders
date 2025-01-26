@@ -205,13 +205,11 @@ function handlePlayerMovement() {
   if (isGameOver || isPaused) return;
   if (keysPressed["ArrowLeft"] && playerPosition > 0) {
     playerPosition -= playerSpeed;
-    player.style.transform = `translate(${playerPosition
-      }px, 550px)`;
+    player.style.transform = `translate(${playerPosition}px, 550px)`;
   }
   if (keysPressed["ArrowRight"] && playerPosition < 550) {
     playerPosition += playerSpeed;
-    player.style.transform = `translate(${playerPosition
-      }px, 550px)`;
+    player.style.transform = `translate(${playerPosition}px, 550px)`;
   }
   if (keysPressed[" "]) fireBullet();
   playerAnimationId = requestAnimationFrame(handlePlayerMovement);
@@ -291,7 +289,7 @@ function resetGame() {
 
   cancelAnimations();
 
-  requestAnimations()
+  requestAnimations();
 }
 
 function cancelAnimations() {
@@ -315,12 +313,13 @@ function startgame() {
 
   cancelAnimations();
 
-  requestAnimations()
+  requestAnimations();
 }
 let currentTimer = 0;
 document.addEventListener("keydown", (e) => {
+  e.preventDefault();
   keysPressed[e.key] = true;
-  currentTimer = parseInt(timerspan.textContent, 10)
+  currentTimer = parseInt(timerspan.textContent, 10);
   console.log(currentTimer);
 
   if (e.key.toLowerCase() === "p" && !isGameOver && !win) {
@@ -344,11 +343,10 @@ function requestAnimations() {
   enemiesAnimationId = requestAnimationFrame(updateEnemies);
   bulletsAnimationId = requestAnimationFrame(updateBullets);
   playerAnimationId = requestAnimationFrame(handlePlayerMovement);
-  startIncrementId = requestAnimationFrame(startIncrement)
-
+  startIncrementId = requestAnimationFrame(startIncrement);
 }
 
-// Counter 
+// Counter
 let count = 0;
 let timer_counter = null;
 let timerspan = document.querySelector(".timer");
@@ -356,11 +354,10 @@ let minute = 0;
 let second = 0;
 
 function incrementCounter() {
-
   if (isPaused) {
     clearTimeout(timer_counter);
     timer_counter = null;
-    return
+    return;
   } else {
     count++;
     if (count % 60 === 0) {
@@ -395,5 +392,3 @@ function stopIncrement() {
   clearTimeout(timer_counter);
   timer_counter = null;
 }
-
-

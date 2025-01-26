@@ -136,7 +136,7 @@ button:hover {
 }
 
 .message {
-  z-index: -3;
+  z-index: -10;
   color: white;
   height: 200%;
   width: 200%;
@@ -147,5 +147,5 @@ button:hover {
   justify-content: center;
   align-items: center;
   transform: translate(-50%, -50%);
-  background-color: gray;
+  background-color: rgb(104, 103, 103);
 }
