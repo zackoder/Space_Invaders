@@ -40,7 +40,7 @@ function Score() {
 }
 requestAnimationFrame(Score);
 
-const layout = document.querySelector(".lay_out");
+// const layout = document.querySelector(".lay_out");
 
 let enemiesAnimationId = null;
 let bulletsAnimationId = null;
@@ -351,11 +351,13 @@ const message = document.querySelector(".message");
 
 function trackResizing() {
   setInterval(() => {
-    let windowWidth = window.innerWidth;
-    let windowHeight = window.innerHeight;
+    let windowWidth = document.body.offsetWidth;
+    let windowHeight = document.body.offsetHeight;
+
+    console.log(windowHeight <= 1000, windowWidth <= 700);
     if (
-      windowHeight <= windowHeight / 2 + 550 ||
-      windowWidth <= windowWidth / 2 + 480
+      windowHeight <= 730 ||
+      windowWidth <= 640
     ) {
       message.style.zIndex = 1000;
       isPaused = true;
